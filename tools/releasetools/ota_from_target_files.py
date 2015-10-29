@@ -582,8 +582,18 @@ else if get_stage("%(bcb_dev)s") == "3/3" then
 """ % bcb_dev)
 
   # Dump fingerprints
-  script.Print("Target: %s" % CalculateFingerprint(
-      oem_props, oem_dict, OPTIONS.info_dict))
+  #script.Print("Target: %s" % CalculateFingerprint(
+  #    oem_props, oem_dict, OPTIONS.info_dict))
+  script.Print("******************************************");
+  script.Print("*                                        *");
+  script.Print("* _|    _|  _|_|_|    _|_|_|_|  _|_|_|   *");
+  script.Print("* _|    _|  _|    _|  _|        _|    _| *");
+  script.Print("* _|    _|  _|_|_|    _|_|_|    _|_|_|   *");
+  script.Print("* _|    _|  _|    _|  _|        _|    _| *");
+  script.Print("* _|    _|  _|    _|  _|        _|    _| *");
+  script.Print("*   _|_|    _|_|_|    _|_|_|_|  _|    _| *");
+  script.Print("*                                        *");
+  script.Print("******************************************"); 
 
   script.AppendExtra("ifelse(is_mounted(\"/system\"), unmount(\"/system\"));")
   device_specific.FullOTA_InstallBegin()
