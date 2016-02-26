@@ -5,6 +5,7 @@ Invoke ". build/envsetup.sh" from your shell to add the following functions to y
 - tapas:   tapas [<App1> <App2> ...] [arm|x86|mips|armv5|arm64|x86_64|mips64] [eng|userdebug|user]
 - croot:   Changes directory to the top of the tree.
 - m:       Makes from the top of the tree.
+- mka:      Builds using SCHED_BATCH on all processors
 - mm:      Builds all of the modules in the current directory, but not their dependencies.
 - mmm:     Builds all of the modules in the supplied directories, but not their dependencies.
            To limit the modules being built use the syntax: mmm dir/:target1,target2.
@@ -1391,6 +1392,23 @@ function godir () {
     \cd $T/$pathname
 }
 
+function mka() {
+    local T=$(gettop)
+    if [ "$T" ]; then
+        case `uname -s` in
+            Darwin)
+                make -C $T -j `sysctl hw.ncpu|cut -d" " -f2` "$@"
+                ;;
+            *)
+                mk_timer schedtool -B -n 1 -e ionice -n 1 make -C $T -j$(cat /proc/cpuinfo | grep "^processor" | wc -l) "$@"
+                ;;
+        esac
+
+    else
+        echo "Couldn't locate the top of the tree.  Try setting TOP."
+    fi
+}
+
 # Force JAVA_HOME to point to java 1.7 if it isn't already set.
 #
 # Note that the MacOS path for java 1.7 includes a minor revision number (sigh).
@@ -1441,10 +1459,10 @@ function get_make_command()
   echo command make
 }
 
-function make()
+function mk_timer()
 {
     local start_time=$(date +"%s")
-    $(get_make_command) "$@"
+    $@
     local ret=$?
     local end_time=$(date +"%s")
     local tdiff=$(($end_time-$start_time))
@@ -1477,6 +1495,11 @@ function make()
     echo -e " ####${color_reset}"
     echo
     return $ret
+}
+
+function make()
+{
+    mk_timer $(get_make_command) "$@"
 }
 
 if [ "x$SHELL" != "x/bin/bash" ]; then
